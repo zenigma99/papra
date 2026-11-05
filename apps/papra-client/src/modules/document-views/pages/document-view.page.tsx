@@ -11,6 +11,7 @@ import {
   standardActionsColumn,
   tagsColumn,
 } from '@/modules/documents/components/documents-list.component';
+import { createParamSynchronizedDocumentsSorting } from '@/modules/documents/documents-sorting.composables';
 import { fetchOrganizationDocuments } from '@/modules/documents/documents.services';
 import { useI18n } from '@/modules/i18n/i18n.provider';
 import { useConfirmModal } from '@/modules/shared/confirm';
@@ -35,6 +36,8 @@ export const DocumentViewPage: Component = () => {
   const { confirm } = useConfirmModal();
   const { getErrorMessage } = useI18nApiErrors({ t });
   const [getPagination, setPagination] = createParamSynchronizedPagination();
+  const { getSortField, getSortOrder, getSorting, setSorting } =
+    createParamSynchronizedDocumentsSorting();
   const [getIsUpdateOpen, setIsUpdateOpen] = createSignal(false);
 
   const deleteDocumentViewConfirm = async () => {
@@ -93,11 +96,15 @@ export const DocumentViewPage: Component = () => {
       params.documentViewId,
       documentViewQuery.data?.documentView?.query ?? '',
       getPagination(),
+      getSortField(),
+      getSortOrder(),
     ],
     queryFn: async () =>
       fetchOrganizationDocuments({
         organizationId: params.organizationId,
         searchQuery: documentViewQuery.data?.documentView?.query ?? '',
+        sortField: getSortField(),
+        sortOrder: getSortOrder(),
         ...getPagination(),
       }),
     enabled: Boolean(documentViewQuery.data?.documentView),
@@ -172,6 +179,8 @@ export const DocumentViewPage: Component = () => {
                     documentsCount={getData().documentsCount}
                     getPagination={getPagination}
                     setPagination={setPagination}
+                    getSorting={getSorting}
+                    setSorting={setSorting}
                     extraColumns={[
                       tagsColumn,
                       documentDateColumn,
